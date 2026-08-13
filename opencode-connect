@@ -1,0 +1,45 @@
+#!/bin/bash
+# opencode-connect - Receive reverse SSH connection from opencode Docker container
+# Usage: ./opencode-connect
+#        bash opencode-connect
+
+set -e
+
+echo "Opencode Reverse SSH Connection Tool"
+echo "========================================"
+
+# Configuration
+CONTAINER_PORT=2222      # Port forwarded from container
+LOCAL_PORT=2222        # Local port to connect to
+
+# Check if ssh is available
+if ! command -v ssh &> /dev/null; then
+    echo "Error: ssh is not installed"
+    exit 1
+fi
+
+echo ""
+echo "To connect to opencode container terminal:"
+echo "1. Make sure opencode Docker has reverse SSH enabled:"
+echo "   REVERSE_SSH_HOST=user@your-ip"
+echo "   REVERSE_SSH_PORT=2222"
+echo ""
+echo "2. Run this command on your machine:"
+echo "   ssh -p ${LOCAL_PORT} localhost"
+echo ""
+echo "3. Enter password or key when prompted"
+echo ""
+echo "Or run this script to start a persistent listener:"
+echo "--------------------------------------------------------"
+echo "This script will maintain the SSH connection and reconnect if needed."
+echo ""
+
+# Try to connect immediately
+echo "Attempting SSH connection to localhost:${LOCAL_PORT}..."
+ssh -p "${LOCAL_PORT}" localhost -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -T 2>&1 || {
+    echo ""
+    echo "Connection failed. This is normal if the container hasn't"
+    echo "started reverse SSH yet. Make sure container has:"
+    echo "  REVERSE_SSH_HOST=your-user@your-ip"
+    echo "  REVERSE_SSH_PORT=2222"
+}

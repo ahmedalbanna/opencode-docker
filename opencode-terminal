@@ -1,0 +1,34 @@
+#!/bin/bash
+# opencode-terminal - Quick access to opencode Docker container
+# Usage: ./opencode-terminal
+#        bash opencode-terminal <container_name>
+
+set -e
+
+COMPOSE_FILE="/home/frappe/opencode-docker/docker-compose.yml"
+CONTAINER="${1:-opencode}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Change to the docker-compose directory
+cd "$SCRIPT_DIR"
+
+# Verify docker is running (try with sudo if needed)
+if ! docker info > /dev/null 2>&1; then
+    echo "WARNING: Docker info check failed, trying with sudo..."
+    DOCKER_CMD="sudo docker"
+else
+    DOCKER_CMD="docker"
+fi
+
+# Check if container is running
+if ! $DOCKER_CMD compose -f "$COMPOSE_FILE" ps -q "$CONTAINER" > /dev/null 2>&1; then
+    echo "Error: Container '$CONTAINER' is not running"
+    $DOCKER_CMD compose -f "$COMPOSE_FILE" ps
+    exit 1
+fi
+
+echo "Connecting to opencode container: $CONTAINER"
+echo "----------------------------------------"
+
+# Execute bash inside the container
+$DOCKER_CMD compose -f "$COMPOSE_FILE" exec "$CONTAINER" /bin/bash

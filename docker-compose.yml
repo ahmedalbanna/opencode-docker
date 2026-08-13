@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  opencode:
+    image: ubuntu:24.04
+    container_name: opencode
+    restart: unless-stopped
+    network_mode: "host"
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENCODE_PORT=3000
+      - OPENCODE_HOST=0.0.0.0
+      # Uncomment and set REVERSE_SSH_HOST/REVERSE_SSH_PORT to enable remote terminal access:
+      # - REVERSE_SSH_HOST=user@your-server.com
+      # - REVERSE_SSH_PORT=2222
+    volumes:
+      - /home/frappe/.opencode/bin/opencode:/usr/local/bin/opencode:ro
+      - ./storage:/home/frappe/opencode-docker/storage:rw
+      - ./config:/home/frappe/opencode-docker/config:rw
+      - ./logs:/home/frappe/opencode-docker/logs:rw
+      - ./entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - /home/frappe:/home/frappe:rw
+    entrypoint: [ "/usr/local/bin/entrypoint.sh" ]

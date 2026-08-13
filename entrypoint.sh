@@ -25,6 +25,11 @@ if [ -d "$FP_HOME" ]; then
     echo "Working directory set to: $(pwd)"
 fi
 
+# Get container's IP address from docker network
+# In bridge network, we can get the IP via docker inspect
+CONTAINER_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' opencode 2>/dev/null || echo "127.0.0.1")
+echo "Container IP address: $CONTAINER_IP"
+
 # Read port and hostname from environment variables with defaults
 # To customize, edit the OPENCODE_PORT and OPENCODE_HOST variables in docker-compose.yml
 OPENCODE_PORT="${OPENCODE_PORT:-8080}"

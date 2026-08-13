@@ -5,9 +5,11 @@ services:
     image: ubuntu:24.04
     container_name: opencode
     restart: unless-stopped
-    network_mode: "host"
+    # Using bridge network for dynamic IP on each restart
     ports:
       - "3000:3000"
+    # Using bridge network for dynamic IP on each restart
+    # ports are mapped explicitly above
     environment:
       - OPENCODE_PORT=3000
       - OPENCODE_HOST=0.0.0.0

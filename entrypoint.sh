@@ -1,20 +1,18 @@
 #!/bin/bash
 set -e
 
-# Ensure storage directory exists and has UUID
+# Ensure storage directory exists
 STORAGE_DIR="/home/frappe/opencode-docker/storage"
 UUID_FILE="${STORAGE_DIR}/uuid.txt"
 
-if [ ! -f "$UUID_FILE" ]; then
-    # Generate a unique identifier using container ID + timestamp
-    CONTAINER_ID=$(cat /etc/hostname 2>/dev/null || echo "unknown")
-    TIMESTAMP=$(date +%s%N)
-    UNIQUE_ID="opencode-${CONTAINER_ID}-${TIMESTAMP}"
-    echo "$UNIQUE_ID" > "$UUID_FILE"
-    echo "Generated new UUID: $UNIQUE_ID"
-else
-    echo "Using existing UUID: $(cat "$UUID_FILE")"
-fi
+# Always generate a new unique identifier on every startup
+# This ensures fresh identifier on each 'docker compose down && up'
+CONTAINER_ID=$(cat /etc/hostname 2>/dev/null || echo "unknown")
+TIMESTAMP=$(date +%s%N)
+UNIQUE_ID="opencode-${CONTAINER_ID}-${TIMESTAMP}"
+echo "$UNIQUE_ID" > "$UUID_FILE"
+
+echo "Generated new UUID on startup: $UNIQUE_ID"
 
 # Ensure config directory permissions
 chmod 755 "$STORAGE_DIR"
@@ -35,7 +33,6 @@ OPENCODE_HOST="${OPENCODE_HOST:-127.0.0.1}"
 # Reverse SSH tunnel configuration
 # Set REVERSE_SSH_HOST and REVERSE_SSH_PORT env vars to enable
 # Example: REVERSE_SSH_HOST=user@your-server.com REVERSE_SSH_PORT=22
-# This will forward container's port 2222 to your-server.com:2222
 if [ -n "${REVERSE_SSH_HOST:-}" ] && [ -n "${REVERSE_SSH_PORT:-}" ]; then
     echo "Setting up reverse SSH tunnel to ${REVERSE_SSH_HOST}:${REVERSE_SSH_PORT}..."
     # Run ssh in background to establish reverse tunnel

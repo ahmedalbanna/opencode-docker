@@ -5,11 +5,10 @@ services:
     image: ubuntu:24.04
     container_name: opencode
     restart: unless-stopped
-    # Using bridge network for dynamic IP on each restart
+    # Using external bridge network (opencode-net) so the gateway IP
+    # changes on every opencode-up.sh run.
     ports:
       - "3000:3000"
-    # Using bridge network for dynamic IP on each restart
-    # ports are mapped explicitly above
     environment:
       - OPENCODE_PORT=3000
       - OPENCODE_HOST=0.0.0.0
@@ -24,3 +23,9 @@ services:
       - ./entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - /home/frappe:/home/frappe:rw
     entrypoint: [ "/usr/local/bin/entrypoint.sh" ]
+    networks:
+      - opencode-net
+
+networks:
+  opencode-net:
+    external: true

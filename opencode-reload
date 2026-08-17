@@ -1,0 +1,12 @@
+#!/bin/bash
+# opencode-reload - Restart only the opencode process to refresh UI config.
+# Does NOT stop/recreate/restart the container or its network.
+# Usage: ./opencode-reload
+
+COMPOSE='sudo docker compose -f /home/frappe/opencode-docker/docker-compose.yml'
+if docker info > /dev/null 2>&1; then
+    COMPOSE="docker compose -f /home/frappe/opencode-docker/docker-compose.yml"
+fi
+
+echo "Reloading opencode (restarting process only, container untouched)..."
+$COMPOSE exec opencode /usr/local/bin/reload.sh

@@ -60,4 +60,26 @@ if [ -n "${REVERSE_SSH_HOST:-}" ] && [ -n "${REVERSE_SSH_PORT:-}" ]; then
 fi
 
 echo "Starting opencode on ${OPENCODE_HOST}:${OPENCODE_PORT}"
-exec opencode serve --port "${OPENCODE_PORT}" --hostname "${OPENCODE_HOST}" --mdns false
+
+# Run opencode as a background process (NOT PID 1) so it can be stopped and
+# restarted in-place via reload.sh without stopping the container.
+PIDFILE="/var/run/opencode.pid"
+
+start_opencode() {
+    opencode serve --port "${OPENCODE_PORT}" --hostname "${OPENCODE_HOST}" --mdns false &
+    echo $! > "${PIDFILE}"
+    echo "opencode started (PID $(cat ${PIDFILE}))"
+}
+
+start_opencode
+
+# Supervisor loop: keep opencode running. If it is stopped (e.g. by
+# reload.sh) or dies, restart it with the current config. The container
+# itself stays alive the whole time (this bash process is PID 1).
+while true; do
+    if ! kill -0 "$(cat "${PIDFILE}" 2>/dev/null)" 2>/dev/null; then
+        echo "opencode not running; restarting..."
+        start_opencode
+    fi
+    sleep 5
+done

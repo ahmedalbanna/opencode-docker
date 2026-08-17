@@ -21,6 +21,7 @@ services:
       - ./config:/home/frappe/opencode-docker/config:rw
       - ./logs:/home/frappe/opencode-docker/logs:rw
       - ./entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - ./reload.sh:/usr/local/bin/reload.sh:ro
       - /home/frappe:/home/frappe:rw
     entrypoint: [ "/usr/local/bin/entrypoint.sh" ]
     networks:
